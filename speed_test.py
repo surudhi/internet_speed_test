@@ -1,9 +1,11 @@
+
 import speedtest as st
 import pandas as pd
 from datetime import datetime
 import schedule
 import time
 import sys
+import csv
 
 def get_new_speeds():
     speed_test = st.Speedtest()
@@ -25,7 +27,7 @@ def update_csv(internet_speeds):
     # Get today's date in the form Month Day, Year Hour:Min:Sec
     date_today = datetime.today().strftime("%B %d, %Y %H:%M:%S")
     # File with the dataset
-    csv_file_name = "internet_speeds_dataset.csv"
+    csv_file_name = "int_speed.csv"
 
     # Load the CSV to update
     try:
@@ -35,24 +37,27 @@ def update_csv(internet_speeds):
     except:
         csv_dataset = pd.DataFrame(
             list(),
-            columns=["Ping (ms)", "Download (Mb/s)", "Upload (Mb/s)"]
+            columns=["Ping", "Download", "Upload"]
         )
 
     # Create a one-row DataFrame for the new test results
     results_df = pd.DataFrame(
         [[ internet_speeds[0], internet_speeds[1], internet_speeds[2] ]],
-        columns=["Ping (ms)", "Download (Mb/s)", "Upload (Mb/s)"],
+        columns=["Ping", "Download", "Upload"],
         index=[date_today]
     )
 
     updated_df = csv_dataset.append(results_df, sort=False)
-    # https://stackoverflow.com/a/34297689/9263761
+
     updated_df\
         .loc[~updated_df.index.duplicated(keep="last")]\
         .to_csv(csv_file_name, index_label="Date")
 
 def end_sched():
     schedule.clear()
+    speed=pd.read_csv('int_speed.csv')
+    maxi=speed['Date'][speed.Download==speed.Download.max()]
+    print(pd.to_datetime(maxi).dt.time)
     sys.exit()
 
 def code():
