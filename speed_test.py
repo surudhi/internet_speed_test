@@ -10,6 +10,7 @@ def get_new_speeds():
 
     # Get ping (miliseconds)
     ping = speed_test.results.ping
+    
     # Perform download and upload speed tests (bits per second)
     download = speed_test.download()
     upload = speed_test.upload()
@@ -45,20 +46,21 @@ def update_csv(internet_speeds):
     )
 
     updated_df = csv_dataset.append(results_df, sort=False)
-    # https://stackoverflow.com/a/34297689/9263761
+    
     updated_df\
         .loc[~updated_df.index.duplicated(keep="last")]\
         .to_csv(csv_file_name, index_label="Date")
 
+# End schedule to stop collecting data    
 def end_sched():
-    return schedule.CancelJob
+    schedule.clear()
 
 def code():
     new_speeds = get_new_speeds()
     update_csv(new_speeds)
 
-schedule.every(30).seconds.do(code)
-schedule.every(10).minutes.do(end_sched)
+schedule.every().minute.do(code)
+schedule.every().hour.do(end_sched)
 while True:   
     # Checks whether a scheduled task  
     # is pending to run or not 
