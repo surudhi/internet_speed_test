@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import schedule
 import time
+import sys
 
 def get_new_speeds():
     speed_test = st.Speedtest()
@@ -10,7 +11,6 @@ def get_new_speeds():
 
     # Get ping (miliseconds)
     ping = speed_test.results.ping
-    
     # Perform download and upload speed tests (bits per second)
     download = speed_test.download()
     upload = speed_test.upload()
@@ -46,21 +46,21 @@ def update_csv(internet_speeds):
     )
 
     updated_df = csv_dataset.append(results_df, sort=False)
-    
+    # https://stackoverflow.com/a/34297689/9263761
     updated_df\
         .loc[~updated_df.index.duplicated(keep="last")]\
         .to_csv(csv_file_name, index_label="Date")
 
-# End schedule to stop collecting data    
 def end_sched():
     schedule.clear()
+    sys.exit()
 
 def code():
     new_speeds = get_new_speeds()
     update_csv(new_speeds)
 
 schedule.every().minute.do(code)
-schedule.every().hour.do(end_sched)
+schedule.every(2).minutes.do(end_sched)
 while True:   
     # Checks whether a scheduled task  
     # is pending to run or not 
