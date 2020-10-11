@@ -1,11 +1,13 @@
 
 import speedtest as st
 import pandas as pd
-from datetime import datetime
+import datetime as dt
 import schedule
 import time
 import sys
 import csv
+import matplotlib.pyplot as plt
+from matplotlib import dates, rcParams
 
 def get_new_speeds():
     speed_test = st.Speedtest()
@@ -25,7 +27,7 @@ def get_new_speeds():
 
 def update_csv(internet_speeds):
     # Get today's date in the form Month Day, Year Hour:Min:Sec
-    date_today = datetime.today().strftime("%B %d, %Y %H:%M:%S")
+    date_today = dt.datetime.today().strftime("%B %d, %Y %H:%M")
     # File with the dataset
     csv_file_name = "int_speed.csv"
 
@@ -57,15 +59,35 @@ def end_sched():
     schedule.clear()
     speed=pd.read_csv('int_speed.csv')
     maxi=speed['Date'][speed.Download==speed.Download.max()]
-    print(pd.to_datetime(maxi).dt.time)
+    opt=pd.to_datetime(maxi)
+    opt=opt.dt.round('30min')
+    hr=hr=dt.timedelta(hours=1)
+    opt1=opt+hr
+    print('Optimum time to use:', opt.dt.time.to_string(index=False), 'to', opt1.dt.time.to_string(index=False))
+    plot_file_name = 'bandwidth.png'
+    create_plot(plot_file_name)
     sys.exit()
+
+def create_plot(plot_file_name):
+  speeds = pd.read_csv('int_speed.csv')
+  speeds=speeds[-48:]  
+  make_plot_file(speeds, plot_file_name)
+
+def make_plot_file(speeds, file_plot_name):
+  rcParams['xtick.labelsize'] = 'xx-small'
+  plt.plot(speeds['Date'],speeds['Download'], 'b-')
+  plt.title('Speed Test Results (24 hours)')
+  plt.ylabel('Bandwidth in Mbps')
+  plt.xlabel('Date/Time')
+  plt.xticks(rotation='45')
+  plt.show()
 
 def code():
     new_speeds = get_new_speeds()
     update_csv(new_speeds)
 
-schedule.every(30).minutes.do(code)
-schedule.every().day.do(end_sched)
+schedule.every().minute.do(code)
+schedule.every().minute.do(end_sched)
 while True:   
     # Checks whether a scheduled task  
     # is pending to run or not 
