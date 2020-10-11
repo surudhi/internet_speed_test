@@ -73,9 +73,6 @@ def create_plot(plot_file_name):
   speeds=speeds[-48:]  
   speeds['Date']=pd.to_datetime(speeds['Date'],errors='coerce')
   speeds['Time']=speeds['Date'].dt.strftime("%H:%M")
-  make_plot_file(speeds, plot_file_name)
-
-def make_plot_file(speeds, file_plot_name):
   rcParams['xtick.labelsize'] = 'xx-small'
   plt.plot(speeds['Time'],speeds['Download'], 'b-')
   plt.title('Speed Test Results (24 hours)')
@@ -90,10 +87,12 @@ def code():
     new_speeds = get_new_speeds()
     update_csv(new_speeds)
 
-schedule.every().minute.do(code)
-schedule.every().minute.do(end_sched)
-while True:   
-    # Checks whether a scheduled task  
-    # is pending to run or not 
-    schedule.run_pending() 
-    time.sleep(1)
+def main():
+    schedule.every().minute.do(code)
+    schedule.every().minute.do(end_sched)
+    while True:    
+        schedule.run_pending() 
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()
