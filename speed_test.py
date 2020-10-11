@@ -64,8 +64,8 @@ def code():
     new_speeds = get_new_speeds()
     update_csv(new_speeds)
 
-schedule.every().minute.do(code)
-schedule.every(2).minutes.do(end_sched)
+schedule.every(30).minutes.do(code)
+schedule.every().day.do(end_sched)
 while True:   
     # Checks whether a scheduled task  
     # is pending to run or not 
