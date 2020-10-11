@@ -27,7 +27,7 @@ def get_new_speeds():
 
 def update_csv(internet_speeds):
     # Get today's date in the form Month Day, Year Hour:Min:Sec
-    date_today = dt.datetime.today().strftime("%B %d, %Y %H:%M")
+    date_today = dt.datetime.today().strftime("%B %d, %Y %H:%M:%S")
     # File with the dataset
     csv_file_name = "int_speed.csv"
 
@@ -63,7 +63,7 @@ def end_sched():
     opt=opt.dt.round('30min')
     hr=hr=dt.timedelta(hours=1)
     opt1=opt+hr
-    print('Optimum time to use:', opt.dt.time.to_string(index=False), 'to', opt1.dt.time.to_string(index=False))
+    print('\n\nOptimum time to use:', opt.dt.time.to_string(index=False), 'to', opt1.dt.time.to_string(index=False))
     plot_file_name = 'bandwidth.png'
     create_plot(plot_file_name)
     sys.exit()
@@ -71,13 +71,17 @@ def end_sched():
 def create_plot(plot_file_name):
   speeds = pd.read_csv('int_speed.csv')
   speeds=speeds[-48:]  
+  speeds['Date']=pd.to_datetime(speeds['Date'],errors='coerce')
+  speeds['Time']=speeds['Date'].dt.strftime("%H:%M")
   make_plot_file(speeds, plot_file_name)
 
 def make_plot_file(speeds, file_plot_name):
   rcParams['xtick.labelsize'] = 'xx-small'
-  plt.plot(speeds['Date'],speeds['Download'], 'b-')
+  plt.plot(speeds['Time'],speeds['Download'], 'b-')
   plt.title('Speed Test Results (24 hours)')
   plt.ylabel('Bandwidth in Mbps')
+  plt.yticks(range(0,51,5))
+  plt.ylim(0.0,50.0)
   plt.xlabel('Date/Time')
   plt.xticks(rotation='45')
   plt.show()
