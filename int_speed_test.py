@@ -51,35 +51,22 @@ def update_csv(internet_speeds):
         .loc[~updated_df.index.duplicated(keep="last")]\
         .to_csv(csv_file_name, index_label="Date")
 
-def end_sched():
-    schedule.clear()
-    speed=pd.read_csv('int_speed.csv')
-    #Find optimum hour with maximum download speed
-    maxi=speed['Date'][speed.Download==speed.Download.max()]
-    opt=pd.to_datetime(maxi)
-    #Round off the time to the nearest hour
-    opt=opt.dt.round('30min')
-    hr=hr=dt.timedelta(hours=1)
-    opt1=opt+hr
-    print('\nOptimum time to use:', opt.dt.time.to_string(index=False), '  to', opt1.dt.time.to_string(index=False))
-    #Plot download speed data over last 24 hours
-    plot_file_name = 'bandwidth.png'
-    create_plot(plot_file_name)
-    sys.exit()
-
 def create_plot(plot_file_name):
   speeds = pd.read_csv('int_speed.csv')
   speeds=speeds[-48:]  
   speeds['Date']=pd.to_datetime(speeds['Date'],errors='coerce')
   speeds['Time']=speeds['Date'].dt.strftime("%H:%M")
   rcParams['xtick.labelsize'] = 'xx-small'
-  plt.plot(speeds['Time'],speeds['Download'], 'b-')
+  plt.plot(speeds['Time'],speeds['Download'], label='Download')
+  plt.plot(speeds['Time'],speeds['Upload'],label='Upload')
   plt.title('Speed Test Results (24 hours)')
   plt.ylabel('Bandwidth in Mbps')
   plt.yticks(range(0,51,5))
   plt.ylim(0.0,50.0)
   plt.xlabel('Date/Time')
   plt.xticks(rotation='45')
+  plt.savefig('speed test.png')
+  plt.legend()
   plt.show()
 
 def optimum_hour():
@@ -107,17 +94,38 @@ def print_results():
 def alert():
     speed=pd.read_csv('int_speed.csv')
     avrg=float("{:.3f}".format(speed['Download'].mean()))
-    print('\nAverage Speed: ',avrg,'Mb/s')
+    print('\nAverage/Expected Download Speed: ',avrg,'Mb/s')
     result=get_new_speeds()
     print('Current Download Speed: ',result['download'],'Mb/s')
     if(avrg>result['download']):
         win32api.MessageBox(0, 'Internet bandwidth is less than expected limit!', 'Speed Alert')
 
+def end_sched():
+    schedule.clear()
+    speed=pd.read_csv('int_speed.csv')
+    #Find optimum hour with maximum download speed
+    speed['Hour']=pd.to_datetime(speed['Date']).dt.hour
+    avg_spd=[]
+    #Compute average for all hours
+    for i in range(0,24):
+        index=speed[speed['Hour']==i].index.tolist()
+        avr_speed=speed['Download'].iloc[index].mean(axis=0)
+        avg_spd.append(avr_speed)
+    #Find the hour with max speed
+    opt=avg_spd.index(max(avg_spd))
+    opt=dt.time(opt,0,0)
+    opt1=dt.time(opt.hour+1)
+    print('\nOptimum time to browse:', opt, ' to', opt1)
+    #Plot download speed data over last 24 hours
+    plot_file_name = 'bandwidth.png'
+    create_plot(plot_file_name)
+    sys.exit()
+    
 def main():
     print_results()
-    alert()
-    schedule.every(30).minutes.do(optimum_hour)
-    schedule.every().day.do(end_sched)
+    schedule.every(30).seconds.do(optimum_hour)
+    schedule.every(30).seconds.do(alert)
+    schedule.every(30).seconds.do(end_sched)
     while True:    
         schedule.run_pending() 
         time.sleep(1)
