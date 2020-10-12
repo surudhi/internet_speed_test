@@ -1,18 +1,10 @@
 # Internet Speed Test Application
 
-## What is this?
+## Description
 
 This work aims towards a python application that will run speed tests on the network and provide insightful results using the speedtest-cli api.
 
-## Usage
-
-The application comes with 3 different functions:
-
-1. Obtain and present current internet speed test results.
-2. Performing speed test on the network continually for longer periods and predict optimum browsing hour.
-3. Performing speed test on the network continually and alerting the user whenever the bandwidth drops below an average/expected level.
-
-## Requirements
+## Installment
 
 Python 3.0 or higher and the following Python libraries must be installed for executing this code. 
 
@@ -22,6 +14,13 @@ pip install schedule
 pip install matplotlib
 pip install csv
 ```
+## Usage
+
+The application comes with 3 different functions:
+
+1. Obtain and present current internet speed test results.
+2. Performing speed test on the network continually for longer periods and predict optimum browsing hour.
+3. Performing speed test on the network continually and alerting the user whenever the bandwidth drops below an average/expected level.
 
 ## Interpreting results
 
