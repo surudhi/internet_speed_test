@@ -123,9 +123,9 @@ def end_sched():
     
 def main():
     print_results()
-    schedule.every(30).seconds.do(optimum_hour)
+    schedule.every(10).minutes.do(optimum_hour)
     schedule.every(30).seconds.do(alert)
-    schedule.every(30).seconds.do(end_sched)
+    schedule.every().day.do(end_sched)
     while True:    
         schedule.run_pending() 
         time.sleep(1)
