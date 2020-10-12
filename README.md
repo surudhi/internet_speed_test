@@ -40,6 +40,6 @@ An **alert** is also triggered whenever the speed drops below the expected or av
 
 ## Example plot
 
-![plot](speed test.png)
+![plot](speed_test.png)
 
 
